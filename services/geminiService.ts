@@ -2,11 +2,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { SocialPost } from '../types';
 
-if (!import.meta.env.VITE_API_KEY) {
+if (!import.meta.env.API_KEY) {
   throw new Error("VITE_API_KEY environment variable not set");
 }
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.API_KEY });
 
 async function generateImageForPost(postContent: string): Promise<string> {
     // 1. Generate a concise visual prompt from the post content for better image results.
