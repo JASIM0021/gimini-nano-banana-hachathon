@@ -6,7 +6,7 @@ if (!process.env.API_KEY) {
   throw new Error("API_KEY environment variable not set");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.API_KEY });
 
 async function generateImageForPost(postContent: string): Promise<string> {
     // 1. Generate a concise visual prompt from the post content for better image results.
