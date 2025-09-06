@@ -2,13 +2,27 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { SocialPost } from '../types';
 
+// Use a singleton pattern to initialize the AI client only when needed.
+// This prevents a crash on load if the API key is not set.
+let ai: GoogleGenAI;
 
-
-const ai = new GoogleGenAI({ apiKey: import.meta.env.API_KEY });
+function getAiClient(): GoogleGenAI {
+  if (!ai) {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      // This error will be caught by the App component's try-catch block
+      // and displayed nicely in the UI.
+      throw new Error("API_KEY is not configured. Please ensure it is set in your deployment environment.");
+    }
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+}
 
 async function generateImageForPost(postContent: string): Promise<string> {
+    const aiClient = getAiClient();
     // 1. Generate a concise visual prompt from the post content for better image results.
-    const promptCreationResponse = await ai.models.generateContent({
+    const promptCreationResponse = await aiClient.models.generateContent({
         model: "gemini-2.5-flash",
         contents: `Based on the following social media post, create a short, descriptive, and visually compelling prompt for an AI image generator. The prompt should capture the essence of the post. Keep it under 50 words. Post: "${postContent}"`,
         config: {
@@ -22,7 +36,7 @@ async function generateImageForPost(postContent: string): Promise<string> {
     }
 
     // 2. Generate the image using the created prompt.
-    const imageResponse = await ai.models.generateImages({
+    const imageResponse = await aiClient.models.generateImages({
         model: 'imagen-4.0-generate-001',
         prompt: imagePrompt || `A visually appealing marketing image related to: ${postContent}`, // use fallback
         config: {
@@ -47,7 +61,8 @@ export async function generateSocialMediaPosts(
     callToAction: string, 
     postLength: string
 ): Promise<SocialPost[]> {
-
+  const aiClient = getAiClient();
+    
   let customizationInstructions = `
 **Customization Rules:**
 - **Tone:** The tone of voice must be strictly '${tone}'.
@@ -79,7 +94,7 @@ export async function generateSocialMediaPosts(
   `;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await aiClient.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
       config: {
@@ -136,6 +151,9 @@ export async function generateSocialMediaPosts(
 
   } catch (error) {
     console.error("Error generating social media posts:", error);
+    if (error instanceof Error && error.message.includes("API_KEY")) {
+        throw error;
+    }
     throw new Error("Failed to generate content from the AI. The model may have returned an unexpected format.");
   }
 }
