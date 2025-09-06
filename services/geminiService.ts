@@ -2,9 +2,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { SocialPost } from '../types';
 
-if (!import.meta.env.API_KEY) {
-  throw new Error("VITE_API_KEY environment variable not set");
-}
+
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.API_KEY });
 
