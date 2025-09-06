@@ -8,7 +8,7 @@ let ai: GoogleGenAI;
 
 function getAiClient(): GoogleGenAI {
   if (!ai) {
-    const apiKey = import.meta.env.API_KEY;
+    const apiKey = 'AIzaSyBjoY52q0ZkrwFiBcRRwRht56bYObDTmcA';
     if (!apiKey) {
       // This error will be caught by the App component's try-catch block
       // and displayed nicely in the UI.
